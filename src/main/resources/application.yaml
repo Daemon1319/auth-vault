@@ -1,0 +1,91 @@
+# 1. COMMON SETTINGS & ACTIVE PROFILE
+spring:
+  application:
+    name: auth-vault
+  profiles:
+    active: local
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-expiry-ms: ${JWT_ACCESS_EXPIRY:30000}
+  refresh-token-expiry-ms: ${JWT_REFRESH_EXPIRY:604800000}
+
+# 2. LOCAL PROFILE 
+---
+spring:
+  config:
+    activate:
+      on-profile: local
+  
+  datasource:
+    url: jdbc:postgresql://localhost:5432/authvault-local
+    username: postgres
+    password: postgres
+
+jwt:
+  secret: v9y$B2zP8q#L5mK!xN7bC4wV1jH6rT3g
+
+server:
+  port: 8080
+
+app:
+  cookie:
+    secure: false
+    same-site: Lax
+  cors:
+    allowed-origins: http://localhost:3000
+
+# 3. PROD PROFILE (Azure + Neon)
+---
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
+    
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      data-source-properties:
+        sslmode: require
+      maximum-pool-size: ${HIKARI_MAX_POOL:5}
+      minimum-idle: ${HIKARI_MIN_IDLE:2}
+      idle-timeout: 300000
+      max-lifetime: 600000
+      connection-timeout: 20000
+
+server:
+  port: ${PORT:8080}
+  shutdown: graceful
+  forward-headers-strategy: NATIVE
+
+app:
+  cookie:
+    secure: ${COOKIE_SECURE:true}
+    same-site: ${COOKIE_SAME_SITE:Lax}
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+  endpoint:
+    health:
+      show-details: never
