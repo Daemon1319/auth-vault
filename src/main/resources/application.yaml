@@ -28,7 +28,7 @@ spring:
       on-profile: local
   
   datasource:
-    url: jdbc:postgresql://localhost:5432/authvault-local
+    url: jdbc:postgresql://localhost:5433/auth-vault-local
     username: postgres
     password: postgres
 
